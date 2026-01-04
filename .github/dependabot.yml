@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      # Exclude release candidates and pre-release versions
+      - dependency-name: "php"
+        versions: ["/.*-rc.*/i", "/.*-alpha.*/i", "/.*-beta.*/i", "/.*-dev.*/i"]
+
