@@ -7,5 +7,15 @@ updates:
     ignore:
       # Exclude release candidates and pre-release versions
       - dependency-name: "php"
-        versions: ["/.*-rc.*/i", "/.*-alpha.*/i", "/.*-beta.*/i", "/.*-dev.*/i"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+        match:
+          # Exclude versions containing -rc, -alpha, -beta, or -dev
+          - dependency-type: "all"
+            version: "/.*-rc.*/i"
+          - dependency-type: "all"
+            version: "/.*-alpha.*/i"
+          - dependency-type: "all"
+            version: "/.*-beta.*/i"
+          - dependency-type: "all"
+            version: "/.*-dev.*/i"
 
