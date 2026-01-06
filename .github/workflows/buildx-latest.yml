@@ -36,6 +36,14 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: andy008/php4seeddms
+          readme-filepath: ./README.md
+          enable-url-completion: true
       - name: Image digest
         run: "echo Image Digest: ${{ steps.docker_build.outputs.digest }}"
       - name: Image Tag
