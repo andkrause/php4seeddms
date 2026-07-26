@@ -1,4 +1,4 @@
-FROM php:8.5.7-apache-trixie
+FROM php:8.5.8-apache-trixie
 
 # Update and install necessary packages
 RUN apt-get update \
