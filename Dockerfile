@@ -1,5 +1,5 @@
 # FROM ghcr.io/php/pie:1.6.0-bin AS pie
-FROM composer:2.9 AS composer
+FROM composer:2.10 AS composer
 
 FROM php:8.6.0-apache-trixie
 
