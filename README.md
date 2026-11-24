@@ -4,7 +4,7 @@ This Docker image is specially customized to meet the installation needs of Seed
 
 ## Overview
 
-This image is based on the lastest available [php-apache](https://hub.docker.com/_/php#phpversion-apache) version and includes all the necessary dependencies, PHP extensions, and PEAR packages required for a complete SeedDMS installation.
+This image is based on the [php-apache](https://hub.docker.com/_/php#phpversion-apache) image and includes dependencies, PHP extensions, and Composer-installed PHP libraries for SeedDMS. WebDAV support is not included.
 
 ## Included Components
 
@@ -26,11 +26,10 @@ This image is based on the lastest available [php-apache](https://hub.docker.com
 - **File Handling**: `zip` for archive operations
 - **Data Processing**: `xsl` for XML/XSLT transformations, `intl` for internationalization
 
-### PEAR Packages
+### PHP Libraries (installed with Composer)
 - `Log` - Logging functionality
 - `Mail` - Email handling
 - `Net_SMTP` - SMTP email transport
-- `HTTP_WebDAV_Server-1.0.0RC8` - WebDAV server capabilities
 
 ## Usage
 
@@ -39,4 +38,3 @@ This image serves as a base image for SeedDMS installations. Build and use it as
 ## Notes
 
 The image is optimized for SeedDMS's document management requirements, including support for various document formats, image processing, and database backends (MySQL and PostgreSQL).
-
