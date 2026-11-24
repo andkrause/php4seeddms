@@ -1,4 +1,12 @@
+FROM ghcr.io/php/pie:1.6.0-bin AS pie
+FROM composer:2.9 AS composer
+
 FROM php:8.6.0-apache-trixie
+
+# Imagick 3.8.1 does not build on PHP 8.6. The fix is merged upstream but not
+# yet released (https://github.com/Imagick/imagick/issues/804), so build from a
+# pinned commit. Replace with a release version (e.g. 3.9.0) once available.
+ARG IMAGICK_VERSION=dev-master#55ed2e9fda264395636a2e27e51f31673f5566ab
 
 # Update and install necessary packages
 RUN apt-get update \
@@ -7,21 +15,17 @@ RUN apt-get update \
     && docker-php-ext-install -j"$(nproc)" gd mysqli pdo pdo_mysql pdo_pgsql zip xsl intl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Imagick with PIE. Version 3.8.1 uses XtOffsetOf, removed in PHP 8.6.
-RUN --mount=type=bind,from=ghcr.io/php/pie:bin,source=/pie,target=/usr/local/bin/pie \
-    curl -fsSL https://github.com/Imagick/imagick/archive/70087bab33eab913e99ac77d64d04d1a2fd0b7b0.tar.gz -o /tmp/imagick.tgz \
-    && mkdir /tmp/imagick \
-    && tar -xzf /tmp/imagick.tgz -C /tmp/imagick --strip-components=1 \
-    && sed -i 's/XtOffsetOf/offsetof/g' /tmp/imagick/php_imagick_defs.h /tmp/imagick/imagick.c \
-    && pie repository:add path /tmp/imagick \
-    && pie install --no-interaction --skip-enable-extension imagick/imagick:@dev \
-    && docker-php-ext-enable imagick \
-    && pie repository:remove /tmp/imagick \
-    && rm -rf /tmp/imagick /tmp/imagick.tgz
+# Third-party extensions are installed with PIE, which is only needed at build time.
+RUN --mount=type=bind,from=pie,source=/pie,target=/usr/local/bin/pie \
+    pie install --no-interaction imagick/imagick:${IMAGICK_VERSION}
 
-# Composer installs the PHP libraries; PIE remains a build-time tool only.
-COPY composer.json composer.lock /opt/seeddms-deps/
-RUN --mount=type=bind,from=composer:2,source=/usr/bin/composer,target=/usr/local/bin/composer \
-    cd /opt/seeddms-deps \
-    && composer install --no-dev --no-interaction --prefer-dist --no-scripts --no-plugins \
-    && echo 'include_path=".:/opt/seeddms-deps/vendor/pear/log:/opt/seeddms-deps/vendor/pear/mail:/opt/seeddms-deps/vendor/pear/net_smtp:/opt/seeddms-deps/vendor/pear/net_socket:/opt/seeddms-deps/vendor/pear/pear-core-minimal/src:/opt/seeddms-deps/vendor/pear/console_getopt:/opt/seeddms-deps/vendor/pear/pear_exception"' > "$PHP_INI_DIR/conf.d/seeddms-deps.ini"
+# PHP libraries are managed with Composer (see composer.json / composer.lock).
+# The generated autoloader also sets the include_path for the PEAR-style
+# libraries (Log, Mail, Net_SMTP) and is loaded for every request.
+WORKDIR /opt/seeddms-deps
+COPY composer.json composer.lock ./
+RUN --mount=type=bind,from=composer,source=/usr/bin/composer,target=/usr/local/bin/composer \
+    composer install --no-dev --no-interaction --no-scripts --no-plugins --optimize-autoloader \
+    && echo 'auto_prepend_file=/opt/seeddms-deps/vendor/autoload.php' > "$PHP_INI_DIR/conf.d/seeddms-deps.ini"
+
+WORKDIR /var/www/html

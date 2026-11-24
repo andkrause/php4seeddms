@@ -26,10 +26,17 @@ This image is based on the [php-apache](https://hub.docker.com/_/php#phpversion-
 - **File Handling**: `zip` for archive operations
 - **Data Processing**: `xsl` for XML/XSLT transformations, `intl` for internationalization
 
-### PHP Libraries (installed with Composer)
+### PHP Libraries (managed with Composer)
 - `Log` - Logging functionality
 - `Mail` - Email handling
 - `Net_SMTP` - SMTP email transport
+
+## Maintenance
+
+- The PHP version is controlled by the `FROM` line and updated by Dependabot (`docker`).
+- PHP libraries are declared in `composer.json` / `composer.lock` and updated by Dependabot (`composer`).
+- Third-party extensions are installed with [PIE](https://github.com/php/pie); bundled extensions use `docker-php-ext-install`. PIE and Composer are only used at build time and are not part of the final image.
+- Imagick is built from a pinned upstream commit because release 3.8.1 does not compile on PHP 8.6 (fixed upstream, [release pending](https://github.com/Imagick/imagick/issues/804)). Switch `IMAGICK_VERSION` in the `Dockerfile` to a release once available.
 
 ## Usage
 
