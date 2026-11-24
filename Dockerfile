@@ -7,24 +7,24 @@ RUN apt-get update \
     && docker-php-ext-install -j"$(nproc)" gd mysqli pdo pdo_mysql pdo_pgsql zip xsl intl \
     && rm -rf /var/lib/apt/lists/*
 
-# Imagick 3.8.1 uses XtOffsetOf, which was removed in PHP 8.6.
-RUN curl -fsSL https://pecl.php.net/get/imagick-3.8.1.tgz -o /tmp/imagick.tgz \
+# Install Imagick with PIE. Version 3.8.1 uses XtOffsetOf, removed in PHP 8.6.
+RUN curl -fsSL https://github.com/php/pie/releases/download/1.6.0/pie.phar -o /usr/local/bin/pie \
+    && chmod +x /usr/local/bin/pie \
+    && curl -fsSL https://github.com/Imagick/imagick/archive/70087bab33eab913e99ac77d64d04d1a2fd0b7b0.tar.gz -o /tmp/imagick.tgz \
     && mkdir /tmp/imagick \
     && tar -xzf /tmp/imagick.tgz -C /tmp/imagick --strip-components=1 \
     && sed -i 's/XtOffsetOf/offsetof/g' /tmp/imagick/php_imagick_defs.h /tmp/imagick/imagick.c \
-    && cd /tmp/imagick \
-    && phpize \
-    && ./configure \
-    && make -j"$(nproc)" \
-    && make install \
+    && pie repository:add path /tmp/imagick \
+    && pie install --no-interaction --skip-enable-extension imagick/imagick:@dev \
     && docker-php-ext-enable imagick \
-    && cd / \
+    && pie repository:remove /tmp/imagick \
     && rm -rf /tmp/imagick /tmp/imagick.tgz
 
 # PHP 8.6 no longer bundles PEAR.
 RUN curl -fsSL https://pear.php.net/go-pear.phar -o /tmp/go-pear.phar \
     && php /tmp/go-pear.phar </dev/null \
     && rm /tmp/go-pear.phar \
+    && rm /usr/local/bin/pecl \
     && echo 'include_path=".:/usr/local/share/pear"' > "$PHP_INI_DIR/conf.d/pear.ini" \
     && pear channel-update pear.php.net \
     && pear install Log \
@@ -35,6 +35,4 @@ RUN curl -fsSL https://pear.php.net/go-pear.phar -o /tmp/go-pear.phar \
     && sed -i -E 's/\$(http_stat|uuid|hex|string|child)\{([^}]+)\}/$\1[\2]/g' /usr/local/share/pear/HTTP/WebDAV/Server.php \
     && sed -i 's/\$stat{0}/$stat[0]/g' /usr/local/share/pear/HTTP/WebDAV/Server/Filesystem.php \
     && find /usr/local/share/pear/HTTP/WebDAV -name '*.php' -exec sh -c 'for file do php -l "$file" || exit 1; done' sh '{}' +
-
-
 
