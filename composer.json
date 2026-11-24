@@ -1,0 +1,10 @@
+{
+    "name": "andkrause/php4seeddms",
+    "description": "PHP libraries required by the SeedDMS base image",
+    "type": "project",
+    "require": {
+        "pear/log": "^1.14",
+        "pear/mail": "^2.0",
+        "pear/net_smtp": "^1.12"
+    }
+}
