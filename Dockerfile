@@ -5,9 +5,9 @@ FROM php:8.6.0-apache-trixie
 
 # Update and install necessary packages
 RUN apt-get update \
-    && apt-get install libpq-dev libicu-dev imagemagick id3 poppler-utils catdoc xpdf html2text docx2txt zlib1g-dev libpng-dev libzip-dev libxslt-dev -y \
+    && apt-get install libpq-dev libicu-dev libonig-dev imagemagick id3 poppler-utils catdoc xpdf html2text docx2txt zlib1g-dev libpng-dev libzip-dev libxslt-dev -y \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-    && docker-php-ext-install -j"$(nproc)" gd mysqli pdo pdo_mysql pdo_pgsql zip xsl intl \
+    && docker-php-ext-install -j"$(nproc)" gd mysqli pdo pdo_mysql pdo_pgsql zip xsl intl mbstring \
     && rm -rf /var/lib/apt/lists/*
 
 # Imagick is disabled until a PHP 8.6 compatible release is available

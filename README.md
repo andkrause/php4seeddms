@@ -18,13 +18,13 @@ This image is based on the [php-apache](https://hub.docker.com/_/php#phpversion-
   - `html2text` for HTML to text conversion
   - `docx2txt` for DOCX file processing
   - `id3` for audio file metadata
-- **Development Libraries**: `zlib1g-dev`, `libpng-dev`, `libzip-dev`, `libxslt-dev` for various PHP extensions
+- **Development Libraries**: `zlib1g-dev`, `libpng-dev`, `libzip-dev`, `libxslt-dev`, `libonig-dev` for various PHP extensions
 
 ### PHP Extensions
 - **Database**: `mysqli`, `pdo`, `pdo_mysql`, `pdo_pgsql` for MySQL and PostgreSQL support
 - **Image Processing**: `gd` for image manipulation (`imagick` temporarily disabled, see Maintenance)
 - **File Handling**: `zip` for archive operations
-- **Data Processing**: `xsl` for XML/XSLT transformations, `intl` for internationalization
+- **Data Processing**: `xsl` for XML/XSLT transformations, `intl` for internationalization, `mbstring` for multibyte string handling
 
 ### PHP Libraries (managed with Composer)
 - `Log` - Logging functionality
